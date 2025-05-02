@@ -40,7 +40,8 @@ def scrape_user_tweets(username: str, tweet_count: int ):
     return tweets
 
 if __name__ == "__main__":
-    username = "elonmusk"  # Örnek kullanıcı adı
-    tweets = scrape_user_tweets(username , 5)
+    username = input("lütfen kullanıcı adını girin(@ veya x.com olmadan): ")  # Örnek kullanıcı adı
+    tweet_sayisi = int(input("Lütfen kaç tweet çekmek istediğinizi girin: "))
+    tweets = scrape_user_tweets(username , tweet_sayisi)
     for idx, tweet in enumerate(tweets, 1):
         print(f"{idx}. {tweet['datetime']} -{tweet['likes']} -{tweet['retweets']} -{tweet['replies']} - {tweet['text']}\n")
