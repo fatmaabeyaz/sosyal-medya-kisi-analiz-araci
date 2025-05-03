@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright #tarayıcı otomasyonu k.
 from parsel import Selector #html içeriğini parse eden k.
 import time
+import json
 
 def scrape_user_tweets(username: str, tweet_count: int ):
     tweets = []
@@ -43,5 +44,24 @@ if __name__ == "__main__":
     username = input("lütfen kullanıcı adını girin(@ veya x.com olmadan): ")  # Örnek kullanıcı adı
     tweet_sayisi = int(input("Lütfen kaç tweet çekmek istediğinizi girin: "))
     tweets = scrape_user_tweets(username , tweet_sayisi)
+     # JSON verisini hazırla
+    json_data = []
     for idx, tweet in enumerate(tweets, 1):
-        print(f"{idx}. {tweet['datetime']} -{tweet['likes']} -{tweet['retweets']} -{tweet['replies']} - {tweet['text']}\n")
+        json_data.append({
+            "id": idx,
+            "datetime": tweet['datetime'],
+            "tweet": tweet['text'],
+            "likes": tweet['likes'],
+            "retweets": tweet['retweets'],
+            "replies": tweet['replies'],
+            "url": tweet['url']
+        })
+    
+    # Dosyaya yaz
+    try:
+        with open(f"{username}.json", "w", encoding="utf-8") as dosya:
+            json.dump(json_data, dosya, ensure_ascii=False, indent=4)
+        print(f"{len(json_data)} tweet başarıyla kaydedildi!")
+    except FileExistsError:
+        print("Hata: Dosya zaten var!")
+        print("Lütfen var olan dosyayı silin.")
