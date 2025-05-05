@@ -1,12 +1,12 @@
 import os
 import sys
-import json            # Eksik kısmı ekledim
-import pymongo         # Eksik kısmı ekledim
+import json            
+import pymongo         
 
 print("Çalışılan dizin:", os.getcwd())
 print("Dizin içeriği:", os.listdir())
 
-def get_db():           # Eksik fonksiyon eklendi
+def get_db():           
     uri = os.environ['MONGODB_URI']
     client = pymongo.MongoClient(uri)
     db = client["sosyalmedya"]
