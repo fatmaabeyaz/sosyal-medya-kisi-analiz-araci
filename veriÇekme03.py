@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright #tarayıcı otomasyonu k.
 from parsel import Selector #html içeriğini parse eden k.
 import time
 import json
+import os
 
 def scrape_user_tweets(username: str, tweet_count: int ):
     tweets = []
@@ -47,8 +48,9 @@ if __name__ == "__main__":
      # JSON verisini hazırla
     json_data = []
     for idx, tweet in enumerate(tweets, 1):
+        idu=tweet['url'].split("/")[-1]  # URL'den tweet ID'sini alır
         json_data.append({
-            "id": idx,
+            "id": idu,
             "datetime": tweet['datetime'],
             "tweet": tweet['text'],
             "likes": tweet['likes'],
@@ -56,12 +58,15 @@ if __name__ == "__main__":
             "replies": tweet['replies'],
             "url": tweet['url']
         })
-    
+    #klasör oluştur
+    klasor_adi = "temp"
+    if not os.path.exists(klasor_adi):
+        os.makedirs(klasor_adi)
+    yol = os.path.join(klasor_adi, f"{username}.json")
     # Dosyaya yaz
     try:
-        with open(f"{username}.json", "w", encoding="utf-8") as dosya:
+        with open(yol, "w", encoding="utf-8") as dosya:
             json.dump(json_data, dosya, ensure_ascii=False, indent=4)
         print(f"{len(json_data)} tweet başarıyla kaydedildi!")
     except FileExistsError:
-        print("Hata: Dosya zaten var!")
-        print("Lütfen var olan dosyayı silin.")
+        print("Hata: bir sorun oluştu!")
