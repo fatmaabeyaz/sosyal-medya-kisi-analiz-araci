@@ -1,0 +1,23 @@
+name: MongoDB’ye Otomatik Aktarım
+on:
+  push:
+    branches: [ main ]
+jobs:
+  aktarim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python kurulumu
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Gerekli paketleri kur
+        run: pip install pymongo python-dotenv
+      - name: Ortam değişkenini yazdır  # (İsteğe bağlı debug adımı)
+        run: echo $MONGODB_URI
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      - name: Verileri MongoDB Atlas'a aktar
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        run: python otomatik_aktar.py
