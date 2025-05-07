@@ -48,8 +48,4 @@ if __name__ == "__main__":
         if dosya_adi.endswith(".json"):
             dosya_yolu = os.path.join(temp_klasoru, dosya_adi)
             koleksiyon_adi = os.path.splitext(dosya_adi)[0]
-<<<<<<< HEAD
             jsondan_mongo_ya_aktar(dosya_yolu, koleksiyon_adi, benzersiz_alan="id")
-=======
-            jsondan_mongo_ya_aktar(dosya_yolu, koleksiyon_adi, benzersiz_alan="id")
->>>>>>> 26fb9f788492c84f0589003b97952579f1cf9959
