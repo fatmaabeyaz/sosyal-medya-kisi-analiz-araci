@@ -3,6 +3,7 @@ from parsel import Selector #html içeriğini parse eden k.
 import time
 import json
 import os
+import sys
 
 def scrape_user_tweets(username: str, tweet_count: int ):
     tweets = []
@@ -42,7 +43,10 @@ def scrape_user_tweets(username: str, tweet_count: int ):
     return tweets
 
 if __name__ == "__main__":
-    username = input("lütfen kullanıcı adını girin(@ veya x.com olmadan): ")  # Örnek kullanıcı adı
+    if len(sys.argv) != 2:
+        print("Kullanım: python .\\veriÇekme03_modül.py <kişi>")
+        sys.exit(1)
+    username = sys.argv[1]  # Komut satırından kullanıcı adını alır
     tweet_sayisi = int(input("Lütfen kaç tweet çekmek istediğinizi girin: "))
     tweets = scrape_user_tweets(username , tweet_sayisi)
      # JSON verisini hazırla
