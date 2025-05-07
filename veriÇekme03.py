@@ -47,9 +47,11 @@ if __name__ == "__main__":
     tweets = scrape_user_tweets(username , tweet_sayisi)
      # JSON verisini hazırla
     json_data = []
-    for idx, tweet in enumerate(tweets, 1):
+        # birden fazla tweet varsa döngüye girer
+    for idx, tweet in enumerate(tweets, 1):# tweets her bir tiweti temsil eder
         idu=tweet['url'].split("/")[-1]  # URL'den tweet ID'sini alır
-        json_data.append({
+        json_data.append({#JSON yapısını oluşturur
+            #yapı burdan ayarlanabilir
             "id": idu,
             "datetime": tweet['datetime'],
             "tweet": tweet['text'],
@@ -59,14 +61,14 @@ if __name__ == "__main__":
             "url": tweet['url']
         })
     #klasör oluştur
-    klasor_adi = "temp"
-    if not os.path.exists(klasor_adi):
-        os.makedirs(klasor_adi)
-    yol = os.path.join(klasor_adi, f"{username}.json")
+    klasor_adi = "temp"# ara klasör ismi deyiştirilebilir
+    if not os.path.exists(klasor_adi):# dosya varmı bakar
+        os.makedirs(klasor_adi)#yoksa oluşturur
+    yol = os.path.join(klasor_adi, f"{username}.json")# klasörün içine oluşturucak dosya yolunu oluşturur
     # Dosyaya yaz
     try:
-        with open(yol, "w", encoding="utf-8") as dosya:
-            json.dump(json_data, dosya, ensure_ascii=False, indent=4)
+        with open(yol, "w", encoding="utf-8") as dosya:#dosyayı yazma ayrıntıları w üzerine yazar deyiştirilebilir
+            json.dump(json_data, dosya, ensure_ascii=False, indent=4)#JSON verisini dosyaya yükler
         print(f"{len(json_data)} tweet başarıyla kaydedildi!")
     except Exception:
         print("Hata: bir sorun oluştu!")
