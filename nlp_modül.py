@@ -22,12 +22,10 @@ def prompt(metinler):
     {''.join([f'- {t}\\n' for t in metinler])}
     
     Çıktı formatı:
-        Çıktı formatı:
-    - Ana Kişilik Özellikleri (3 madde)
-    - İletişim Tarzı
-    - Olası psikolojik açıkları
-    - Dikkat Çeken Kelime Kalıpları
-    - Genel Değerlendirme (100 kelime)
+    - Ana Kişilik Özellikleri (3 kısa madde)
+    - İletişim Tarzı (bir cümle)
+    - Bu kişinin en hassas noktaları
+    - Genel Değerlendirme (25 kelime)
     """# bu prompta talep edilen bilgiler eklenir.
 #apiye yollarkenki ayarlar yapılır bu metodda
 def analiz(metinler):
