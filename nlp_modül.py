@@ -2,6 +2,7 @@ from openai import OpenAI
 import json
 import sys
 import os
+# api key gibi ince ayarlar yapılır
 client = OpenAI(api_key="sk-7f12bd3e7f1343e9bb8c9a3279528017", base_url="https://api.deepseek.com")
 
 
@@ -13,6 +14,7 @@ def toku(met):
     except Exception as e:
         print(f"dosya okunurken hata oluştu.{e}")
         return None
+#prompt ayarlayan fonksiyon
 def prompt(metinler):
     return f"""
     Aşağıdaki tweet'leri analiz edip kişilik özelliklerini çıkar:
@@ -20,49 +22,52 @@ def prompt(metinler):
     {''.join([f'- {t}\\n' for t in metinler])}
     
     Çıktı formatı:
-        Çıktı formatı:
-    - Ana Kişilik Özellikleri (3 madde)
-    - İletişim Tarzı
-    - Olası psikolojik açıkları
-    - Dikkat Çeken Kelime Kalıpları
-    - Genel Değerlendirme (100 kelime)
-    """
+    - Ana Kişilik Özellikleri (3 kısa madde)
+    - İletişim Tarzı (bir cümle)
+    - Bu kişinin en hassas noktaları
+    - Genel Değerlendirme (25 kelime)
+    """# bu prompta talep edilen bilgiler eklenir.
+#apiye yollarkenki ayarlar yapılır bu metodda
 def analiz(metinler):
     try:
         response = client.chat.completions.create(
+            # chat in türü
         model="deepseek-chat",
         messages=[
             {
-                "role": "system", 
+                "role": "system", #ana yapı ne gibi davransın gibi
                 "content": "Sen bir kişilik analiz uzmanısın. Twitter gönderilerine göre psikolojik profil çıkar."
             },
-            {
+            {#prompt gönderilir
                 "role": "user",
                 "content": prompt(metinler)
             }
         ],
+        # max_tokens=1000, #max token sayısı
+        # temperature=0.7, #modelin ne kadar yaratıcı olacağı
+        # gibi ayarlar yapılmakta
         stream=False
         )
-        return response.choices[0].message.content
-    except Exception:
+        return response.choices[0].message.content# çıktı mesajı
+    except Exception:# hata
         print("Analiz sırasında hata oluştu")
         return None
 
 if __name__ == "__main__":
     try:
-        pa = os.path.dirname(os.path.abspath(__file__))
-        os.chdir(f"{pa}/temp")
-    except Exception:
+        pa = os.path.dirname(os.path.abspath(__file__))# şuan bu kod dosyasının çalıştığı yolu alır
+        os.chdir(f"{pa}/temp")# temp kulasörüne ulaşmak için yola /temp eklenir
+    except Exception:# hata mesajı
         print("dosya yok")
         sys.exit(1)
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 2:#komutta 2. unsur varmı bakmar
         print("Kullanım: python nlp.py <json_dosyasi>")
         sys.exit(1)
     
     
     dosyasi = sys.argv[1]  # Komut satırından dosya adını alır
-    metinler = toku(dosyasi)
+    metinler = toku(dosyasi)#toku metoduna dosya adı gönderilir
     if metinler:
         analiz_sonucu = analiz(metinler)
         print(analiz_sonucu)
