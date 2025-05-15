@@ -1,8 +1,7 @@
 from openai import OpenAI
 import json
-# api key gibi ince ayarlar yapılır
-client = OpenAI(api_key="sk-7f12bd3e7f1343e9bb8c9a3279528017", base_url="https://api.deepseek.com")
-
+api_key =""
+client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
 def toku(met):
     try:
@@ -56,8 +55,20 @@ def analiz(metinler):
 if __name__ == "__main__":
     metinler = toku("elonmusk.json")# dosya adı
     # dosya adı değiştirilebilir
-    if metinler:
+#Burası api_key.txt dosyasının varlığını kontrol ediyor
+dosya_adi = "api_key.txt"
+# Dosya mevcut mu kontrol et
+if not os.path.exists(dosya_adi):
+    # Kullanıcıdan API anahtarı al
+    api_key = input("Lütfen DeepSeek API anahtarınızı girin: ")
+    with open(dosya_adi, "w") as f:# Dosyaya yaz
+        f.write(api_key)
+
+# api_key.txt dosyasından API anahtarını oku
+with open('api_key.txt', 'r') as file:
+    api_key = file.read().strip()
+if metinler:
         analiz_sonucu = analiz(metinler)
         print(analiz_sonucu)
-    else:
+else:
         print("Tweet bulunamadı.")
