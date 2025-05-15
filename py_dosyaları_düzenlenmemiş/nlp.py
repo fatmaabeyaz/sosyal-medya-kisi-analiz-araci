@@ -1,3 +1,4 @@
+import os
 from openai import OpenAI
 import json
 api_key =""
