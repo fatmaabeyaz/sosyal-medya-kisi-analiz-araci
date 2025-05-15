@@ -1,1 +1,0 @@
-Bu dizinde bulunan .json uzantılı dosyaların uzak sunucuda public bir şekilde paylaşılması sorun teşkil edebilir. Bu sebeple temp klasörünü git ignore içerisine ekledim.
