@@ -50,3 +50,6 @@ Mikroservis mimarisinin projemize sağladığı avantajlar:
 | **Teknoloji Esnekliği** | Her modül için uygun teknoloji seçilebilir |
 | **Güncelleme ve geliştirme desteği** | Modüller bağımsız olarak güncellenebilir |
 | **Hata İzolasyonu** | Bir modüldeki hata tüm sistemi çökertmez |
+
+Projemizin planlanan diagram görseli:
+![resim](https://github.com/user-attachments/assets/489dc286-16ae-4f76-a162-f808bb8fc54a)
