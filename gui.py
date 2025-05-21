@@ -2,7 +2,8 @@ import sys
 import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                             QHBoxLayout, QLabel, QLineEdit, QPushButton, 
-                            QTextEdit, QSpinBox, QMessageBox, QDialog, QInputDialog)
+                            QTextEdit, QSpinBox, QMessageBox, QDialog,
+                            QFrame)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from data_moduls.veriÇekme03 import scrape_user_tweets
 from data_moduls.nlp import analiz, toku
@@ -41,10 +42,44 @@ class ApiKeyDialog(QDialog):
     def get_api_key(self):
         return self.api_key_input.text()
 
+class StatusIndicator(QWidget):
+    def __init__(self, text, parent=None):
+        super().__init__(parent)
+        
+        # Ana layout
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # İndikatör kutusu
+        self.indicator = QFrame()
+        self.indicator.setFixedSize(20, 20)
+        self.indicator.setFrameShape(QFrame.Shape.Box)
+        self.indicator.setFrameShadow(QFrame.Shadow.Sunken)
+        self.indicator.setStyleSheet("background-color: gray;")
+        
+        # Metin etiketi
+        self.label = QLabel(text)
+        self.label.setStyleSheet("color: #E0E0E0;")
+        
+        # Layout'a ekle
+        layout.addWidget(self.indicator)
+        layout.addWidget(self.label)
+        layout.addStretch()
+        
+        self.setLayout(layout)
+    
+    def set_status(self, success):
+        color = "green" if success else "gray"
+        self.indicator.setStyleSheet(f"background-color: {color};")
+        if success:
+            self.label.setStyleSheet("color: #FFFFFF;")
+        else:
+            self.label.setStyleSheet("color: #E0E0E0;")
+
 class WorkerThread(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
-    log = pyqtSignal(str)  # Yeni log sinyali
+    status_update = pyqtSignal(str, bool)
     
     def __init__(self, username, tweet_count):
         super().__init__()
@@ -53,12 +88,15 @@ class WorkerThread(QThread):
         
     def run(self):
         try:
-            # Veri çekme işlemi
-            self.log.emit("Tweet'ler çekiliyor...")
+            # Tweet'leri çek
+            self.status_update.emit("tweet_cekme", False)
             tweets = scrape_user_tweets(self.username, self.tweet_count)
             
+            if not tweets:
+                self.error.emit("Tweet bulunamadı.")
+                return
+            
             # JSON verisini hazırla
-            self.log.emit("Tweet'ler işleniyor...")
             json_data = []
             for tweet in tweets:
                 idu = tweet['url'].split("/")[-1]
@@ -72,29 +110,37 @@ class WorkerThread(QThread):
                     "url": tweet['url']
                 })
             
-            # Geçici klasör oluştur
+            # Dosyaya kaydet
+            self.status_update.emit("tweet_cekme", True)
+            self.status_update.emit("kaydetme", False)
+            
             klasor_adi = "temp"
             if not os.path.exists(klasor_adi):
                 os.makedirs(klasor_adi)
             
-            # Dosyaya kaydet
-            self.log.emit("Tweet'ler kaydediliyor...")
             yol = os.path.join(klasor_adi, f"{self.username}.json")
             with open(yol, "w", encoding="utf-8") as dosya:
                 import json
                 json.dump(json_data, dosya, ensure_ascii=False, indent=4)
             
+            self.status_update.emit("kaydetme", True)
+            
             # NLP analizi yap
-            self.log.emit("Kişilik analizi yapılıyor...")
+            self.status_update.emit("api_baglanti", False)
             metinler = toku(yol)
-            if metinler:
-                analiz_sonucu = analiz(metinler)
-                if analiz_sonucu:
-                    self.finished.emit(analiz_sonucu)
-                else:
-                    self.error.emit("Analiz sırasında bir hata oluştu.")
+            if not metinler:
+                self.error.emit("Tweet'ler okunamadı.")
+                return
+            
+            self.status_update.emit("api_baglanti", True)
+            self.status_update.emit("api_cevap", False)
+            
+            analiz_sonucu = analiz(metinler)
+            if analiz_sonucu:
+                self.status_update.emit("api_cevap", True)
+                self.finished.emit(analiz_sonucu)
             else:
-                self.error.emit("Tweet bulunamadı.")
+                self.error.emit("Analiz sırasında bir hata oluştu.")
                 
         except Exception as e:
             self.error.emit(f"Bir hata oluştu: {str(e)}")
@@ -134,11 +180,26 @@ class MainWindow(QMainWindow):
         self.analyze_button.clicked.connect(self.start_analysis)
         layout.addWidget(self.analyze_button)
         
-        # Log alanı
-        self.log_text = QTextEdit()
-        self.log_text.setReadOnly(True)
-        self.log_text.setMaximumHeight(100)
-        layout.addWidget(self.log_text)
+        # Durum göstergeleri
+        status_frame = QFrame()
+        status_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        status_layout = QVBoxLayout(status_frame)
+        
+        # Durum göstergeleri - yan yana yerleştirme
+        status_indicators_layout = QHBoxLayout()
+        self.tweet_status = StatusIndicator("Tweet çekme aşamasında")
+        self.save_status = StatusIndicator("Tweet kaydetme aşamasında")
+        self.api_conn_status = StatusIndicator("API bağlantı aşamasında")
+        self.api_resp_status = StatusIndicator("API yanıt aşamasında")
+        
+        status_indicators_layout.addWidget(self.tweet_status)
+        status_indicators_layout.addWidget(self.save_status)
+        status_indicators_layout.addWidget(self.api_conn_status)
+        status_indicators_layout.addWidget(self.api_resp_status)
+        status_indicators_layout.addStretch()
+        
+        status_layout.addLayout(status_indicators_layout)
+        layout.addWidget(status_frame)
         
         # Sonuç alanı
         self.result_text = QTextEdit()
@@ -167,17 +228,12 @@ class MainWindow(QMainWindow):
                 if api_key:
                     with open("api_key.txt", "w") as f:
                         f.write(api_key)
-                    self.log("API anahtarı kaydedildi.")
                 else:
                     QMessageBox.warning(self, "Uyarı", "API anahtarı boş olamaz!")
                     self.check_api_key()
             else:
                 QMessageBox.warning(self, "Uyarı", "API anahtarı olmadan analiz yapılamaz!")
                 sys.exit()
-    
-    def log(self, message):
-        self.log_text.append(message)
-        print(message)  # Terminal'e de yazdır
         
     def start_analysis(self):
         username = self.username_input.text().strip()
@@ -188,29 +244,46 @@ class MainWindow(QMainWindow):
         self.analyze_button.setEnabled(False)
         self.statusBar().showMessage("Analiz yapılıyor...")
         self.result_text.clear()
-        self.log_text.clear()
+        
+        # Durum göstergelerini sıfırla
+        self.tweet_status.set_status(False)
+        self.save_status.set_status(False)
+        self.api_conn_status.set_status(False)
+        self.api_resp_status.set_status(False)
         
         # Worker thread'i başlat
         self.worker = WorkerThread(username, self.tweet_count_input.value())
         self.worker.finished.connect(self.handle_results)
         self.worker.error.connect(self.handle_error)
-        self.worker.log.connect(self.log)
+        self.worker.status_update.connect(self.update_status)
         self.worker.start()
+    
+    def update_status(self, status_type, success):
+        if status_type == "tweet_cekme":
+            self.tweet_status.label.setText("Tweet'ler çekildi" if success else "Tweet çekme aşamasında")
+            self.tweet_status.set_status(success)
+        elif status_type == "kaydetme":
+            self.save_status.label.setText("Tweet'ler kaydedildi" if success else "Tweet kaydetme aşamasında")
+            self.save_status.set_status(success)
+        elif status_type == "api_baglanti":
+            self.api_conn_status.label.setText("API bağlantısı kuruldu" if success else "API bağlantı aşamasında")
+            self.api_conn_status.set_status(success)
+        elif status_type == "api_cevap":
+            self.api_resp_status.label.setText("API yanıtı alındı" if success else "API yanıt aşamasında")
+            self.api_resp_status.set_status(success)
         
     def handle_results(self, results):
         self.result_text.setText(results)
         self.analyze_button.setEnabled(True)
         self.statusBar().showMessage("Analiz tamamlandı")
-        self.log("Analiz tamamlandı!")
         
     def handle_error(self, error_message):
         QMessageBox.critical(self, "Hata", error_message)
         self.analyze_button.setEnabled(True)
         self.statusBar().showMessage("Hata oluştu")
-        self.log(f"Hata: {error_message}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec()) 
+    sys.exit(app.exec())
