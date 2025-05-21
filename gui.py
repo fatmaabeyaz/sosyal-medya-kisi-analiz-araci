@@ -2,9 +2,11 @@ import sys
 import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                             QHBoxLayout, QLabel, QLineEdit, QPushButton, 
-                            QTextEdit, QSpinBox, QMessageBox, QDialog,
+                            QTextBrowser, QSpinBox, QMessageBox, QDialog,
                             QFrame)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QTextCursor
+import markdown
 from data_moduls.veriÇekme03 import scrape_user_tweets
 from data_moduls.nlp import analiz, toku
 
@@ -204,8 +206,23 @@ class MainWindow(QMainWindow):
         layout.addWidget(status_frame)
         
         # Sonuç alanı
-        self.result_text = QTextEdit()
-        self.result_text.setReadOnly(True)
+        self.result_text = QTextBrowser()
+        self.result_text.setOpenExternalLinks(True)
+        self.result_text.setStyleSheet("""
+            QTextBrowser {
+                background-color: #2C3E50;
+                color: white;
+                font-size: 12px;
+                padding: 10px;
+                border: 1px solid #BDC3C7;
+            }
+            QTextBrowser a {
+                color: #3498DB;
+            }
+            QTextBrowser a:hover {
+                color: #2980B9;
+            }
+        """)
         layout.addWidget(self.result_text)
         
         # Durum çubuğu
@@ -275,7 +292,10 @@ class MainWindow(QMainWindow):
             self.api_resp_status.set_status(success)
         
     def handle_results(self, results):
-        self.result_text.setText(results)
+        # Markdown'ı HTML'e çevir
+        html = markdown.markdown(results, extensions=['extra', 'codehilite'])
+        # HTML'i göster
+        self.result_text.setHtml(html)
         self.analyze_button.setEnabled(True)
         self.statusBar().showMessage("Analiz tamamlandı")
         
