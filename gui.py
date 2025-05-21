@@ -156,29 +156,31 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
         layout = QVBoxLayout(main_widget)
         
+        # Üst kısım - yan yana yerleştirme
+        top_layout = QHBoxLayout()
+        
         # Kullanıcı adı girişi
-        username_layout = QHBoxLayout()
         username_label = QLabel("Twitter Kullanıcı Adı:")
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Kullanıcı adını girin (@ işareti olmadan)")
-        username_layout.addWidget(username_label)
-        username_layout.addWidget(self.username_input)
-        layout.addLayout(username_layout)
+        top_layout.addWidget(username_label)
+        top_layout.addWidget(self.username_input)
         
         # Tweet sayısı girişi
-        tweet_count_layout = QHBoxLayout()
-        tweet_count_label = QLabel("Analiz Edilecek Tweet Sayısı:")
+        tweet_count_label = QLabel("Tweet Sayısı:")
         self.tweet_count_input = QSpinBox()
         self.tweet_count_input.setRange(1, 100)
         self.tweet_count_input.setValue(10)
-        tweet_count_layout.addWidget(tweet_count_label)
-        tweet_count_layout.addWidget(self.tweet_count_input)
-        layout.addLayout(tweet_count_layout)
+        top_layout.addWidget(tweet_count_label)
+        top_layout.addWidget(self.tweet_count_input)
         
         # Analiz butonu
         self.analyze_button = QPushButton("Analiz Et")
         self.analyze_button.clicked.connect(self.start_analysis)
-        layout.addWidget(self.analyze_button)
+        top_layout.addWidget(self.analyze_button)
+        
+        # Üst kısmı ana layout'a ekle
+        layout.addLayout(top_layout)
         
         # Durum göstergeleri
         status_frame = QFrame()
