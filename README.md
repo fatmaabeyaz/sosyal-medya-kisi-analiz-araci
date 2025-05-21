@@ -53,3 +53,6 @@ Mikroservis mimarisinin projemize sağladığı avantajlar:
 
 Projemizin planlanan diagram görseli:
 ![resim](https://github.com/user-attachments/assets/489dc286-16ae-4f76-a162-f808bb8fc54a)
+
+
+pip install -r requirements.txt
