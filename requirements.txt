@@ -1,0 +1,4 @@
+PyQt6==6.6.1
+playwright==1.41.2
+parsel==1.8.1
+openai==1.12.0 
