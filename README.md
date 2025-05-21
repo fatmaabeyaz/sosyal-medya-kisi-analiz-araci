@@ -20,10 +20,32 @@ X (Twitter) API fiyatları ve yüksek dolar kuru nedeniyle veri kazıma yöntemi
 Veri kazıma yöntemi olarak, [Scrapfly](https://scrapfly.io/blog/how-to-scrape-twitter/)'ın blogunda öğrendiğimiz teknikleri uyguladık.  
 
 ### 2. **Veri İşleme Servisi**
-enes burayı doldur
+Bu makine öğrenme sistemi, BERT kullanılarak geliştirilmiştir. Sistem, verilen veri seti ile eğitilmiş ve aşağıdaki bileşenlerle entegre edilmiştir:
+
+Sistem Özellikleri
+Eğitim Paketi: Modelin eğitimi için gerekli veri işleme ve eğitim süreçlerini içerir.
+
+Depolama: Eğitilmiş model ve veri setleri güvenli bir şekilde depolanmıştır.
+
+Model: BERT (Bidirectional Encoder Representations from Transformers)
 
 ### 3. **LLM API Bağlantı Servisi**
-enes burayı da doldur
+
+#### 📌 Sistem Özeti
+Bu sistem, kullanıcı tarafından sağlanan tweet'leri analiz etmek için **DeepSeek API**'sini kullanan otomatize bir pipeline'dır.
+
+#### 🛠️ Çalışma Mantığı
+
+#### Çalışma şekli
+- Girdi olarak alınan tweet'ler özel bir template ile işlenir
+- İçerik analizi ve dil modeli gereksinimlerine uygun şekilde yapılandırılır
+- Oluşturulan prompt string olarak saklanır
+- APİ ye önceden ana görevi bildirilir
+- Prompt gönderilir
+- Gelen veri talep edilen yere basılır
+
+#### 🔗 API Kaynak Kodu  
+[🌐 DeepSeek Resmi Dokümantasyonu](https://api-docs.deepseek.com/)
 
 ### 4. **Kullanıcı Arayüzü Servisi**
 henüz tamamlanmadı
