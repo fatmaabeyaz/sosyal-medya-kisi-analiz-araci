@@ -2,20 +2,17 @@ import os
 from openai import OpenAI
 import json
 
-#Burası api_key.txt dosyasının varlığını kontrol ediyor
-dosya_adi = "api_key.txt"
-# Dosya mevcut mu kontrol et
-if not os.path.exists(dosya_adi):
-    # Kullanıcıdan API anahtarı al
-    api_key = input("Lütfen DeepSeek API anahtarınızı girin: ")
-    with open(dosya_adi, "w") as f:# Dosyaya yaz
-        f.write(api_key)
-
-# api_key.txt dosyasından API anahtarını oku
-with open('api_key.txt', 'r') as file:
-    api_key = file.read().strip()
-
-client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+def get_client():
+    dosya_adi = "api_key.txt"
+    if not os.path.exists(dosya_adi):
+        raise Exception("API anahtarı bulunamadı. Lütfen önce API anahtarını girin.")
+    
+    with open(dosya_adi, 'r') as file:
+        api_key = file.read().strip()
+        if not api_key:
+            raise Exception("API anahtarı boş. Lütfen geçerli bir API anahtarı girin.")
+    
+    return OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
 def toku(met):
     try:
@@ -44,6 +41,7 @@ def prompt(metinler):
 #apiye yollarkenki ayarlar yapılır bu metodda
 def analiz(metinler):
     try:
+        client = get_client()
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[
