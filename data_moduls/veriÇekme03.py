@@ -8,7 +8,7 @@ def scrape_user_tweets(username: str, tweet_count: int ):
     tweets = []
 
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
+        browser = pw.chromium.launch(headless=False)
         context = browser.new_context()
         page = context.new_page()
 
