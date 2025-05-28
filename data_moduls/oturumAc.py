@@ -12,7 +12,7 @@ async def main():
         await page.goto("https://twitter.com/login")
 
         print("Lütfen manuel olarak giriş yapın...")
-        await page.wait_for_timeout(10000)  # 60 saniye bekle (giriş yapman için)
+        await page.wait_for_timeout(40000)  # 40 saniye bekle (giriş yapman için)
 
         # Oturum bilgilerini kaydet
         cookie_path = os.path.join(os.path.dirname(__file__), "xCookie.json")

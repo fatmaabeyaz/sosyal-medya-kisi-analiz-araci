@@ -204,8 +204,8 @@ class MainWindow(QMainWindow):
         self.button2.clicked.connect(self.open_twitter_session)
         button_layout.addWidget(self.button2)
         
-        self.button3 = QPushButton("Buton 3")
-        self.button3.setEnabled(False)  # Şimdilik devre dışı
+        self.button3 = QPushButton("Uyku Takibi")
+        self.button3.clicked.connect(self.run_sleep_analysis)  # Şimdilik devre dışı
         button_layout.addWidget(self.button3)
         
         self.button4 = QPushButton("Buton 4")
@@ -341,6 +341,18 @@ class MainWindow(QMainWindow):
             subprocess.Popen([sys.executable, script_path])
         except Exception as e:
             QMessageBox.critical(self, "Hata", f"Twitter oturum açma işlemi başlatılamadı: {str(e)}")
+
+    def run_sleep_analysis(self):
+        username = self.username_input.text().strip()
+            
+        try:
+            # Uyku takip modülünü çalıştır
+            subprocess.Popen(
+                [sys.executable, "data_moduls/uykutakip.py", username]
+            )
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Hata", f"Uyku takibi çalıştırılırken bir hata oluştu:\n{str(e)}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
