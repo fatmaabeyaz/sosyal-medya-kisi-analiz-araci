@@ -25,10 +25,11 @@ def toku(met):
 
 #prompt ayarlayan fonksiyon
 def prompt(metinler):
+    newline = '\n'
     return f"""
     Aşağıdaki tweet'leri analiz edip kişilik özelliklerini çıkar:
     
-    {''.join([f'- {t}\\n' for t in metinler])}
+    {''.join([f'- {t}{newline}' for t in metinler])}
     
     Çıktı formatı:
     - Ana Kişilik Özellikleri (3 madde)
