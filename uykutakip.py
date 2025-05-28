@@ -1,74 +1,50 @@
-from pymongo import MongoClient
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+import sys
 
-# MongoDB bağlantı dizesi
-password = "12345Ff.."  # Buraya şifrenizi yazın
-client = MongoClient(f"mongodb+srv://fatmabeyaz418:12345Ff..@sosyalmedya.bvcdmdf.mongodb.net/sosyalmedya?retryWrites=true&w=majority")
+# 👤 Kullanıcı adını komut satırından al
+if len(sys.argv) != 2:
+    print("Kullanım: python uykutakip.py kisiadi")
+    sys.exit(1)
 
-# Başarılı Bağlantı Kontrolü
+kisi_adi = sys.argv[1]
+dosya_yolu = f"temp/{kisi_adi}.json"  # JSON dosyası yolu
+
+# 📁 Dosyanın varlığını kontrol et
+if not os.path.exists(dosya_yolu):
+    print(f"Hata: {dosya_yolu} dosyası bulunamadı!")
+    sys.exit(1)
+
+# 🧾 Veriyi dosyadan oku
 try:
-    client.admin.command('ping')
-    print("MongoDB bağlantısı başarılı!")
+    tweets_df = pd.read_json(dosya_yolu)
 except Exception as e:
-    print("Bağlantı hatası:", e)
+    print(f"Hata: Dosya okunurken bir sorun oluştu: {str(e)}")
+    sys.exit(1)
 
-# Sosyalmedya veritabanını tanımlayın
-db = client['sosyalmedya']
+# 🧠 Uyku durumu tahmini ve saat analizi
+def analyze_tweets(tweets_df):
+    tweets_df["datetime"] = pd.to_datetime(tweets_df["datetime"])
+    tweets_df["Hour"] = tweets_df["datetime"].dt.hour
+    tweets_df["Sleep Status"] = tweets_df["Hour"].apply(lambda x: "Asleep" if x < 6 else "Awake")
 
-# Mevcut koleksiyonları listeleme ve veri çekme
-def fetch_tweets():
-    collections = db.list_collection_names()
-    tweets = []
+    # Kullanıcı adını URL'den çıkar
+    tweets_df["Username"] = tweets_df["url"].apply(lambda url: url.split("/")[1] if "/" in url else "Bilinmiyor")
 
-    for collection_name in collections:
-        tweet_collection = db[collection_name]
-        tweets.extend(list(tweet_collection.find()))
+    sleep_df = tweets_df[["id", "Username", "tweet", "datetime", "Sleep Status", "Hour"]]
+    sleep_df.columns = ['Tweet ID', 'Username', 'Tweet Text', 'Tweet Time', 'Sleep Status', 'Hour']
 
-    return tweets
-
-# Uyku durumu tahmini ve saat analizi
-def analyze_tweets(tweets):
-    sleep_data = []
-    tweet_times = []
-
-    for tweet in tweets:
-        tweet_time = tweet['datetime']
-        tweet_time = pd.to_datetime(tweet_time)
-        tweet_times.append(tweet_time)
-
-        sleep_status = "Asleep" if tweet_time.hour < 6 else "Awake"
-        url = tweet['url']
-        username = url.split('/')[1] if '/' in url else 'Bilinmiyor'
-        tweet_text = tweet['tweet']
-
-        sleep_data.append({
-            'Tweet ID': tweet['id'],
-            'Username': username,
-            'Tweet Text': tweet_text,
-            'Tweet Time': tweet_time,
-            'Sleep Status': sleep_status,
-            'Hour': tweet_time.hour
-        })
-
-    sleep_df = pd.DataFrame(sleep_data)
-    
-    # Saat bazında tweet sayıları
     hourly_counts = sleep_df['Hour'].value_counts().sort_index()
-    
-    # En az tweet atılan saatler
     least_active_hours = hourly_counts[hourly_counts == hourly_counts.min()].index.tolist()
-
-    # Kullanıcı adlarını filtreleme
     least_active_users = sleep_df[sleep_df['Hour'].isin(least_active_hours)]
 
     return sleep_df, hourly_counts, least_active_hours, least_active_users
 
-# Tweetleri çek ve analiz et
-tweets = fetch_tweets()
-analysis_results, hourly_counts, least_active_hours, least_active_users = analyze_tweets(tweets)
+# 🔍 Analiz
+analysis_results, hourly_counts, least_active_hours, least_active_users = analyze_tweets(tweets_df)
 
-# Sonuçları yazdırma
+# 🖨 Sonuçları yazdır
 print("\nUyku Durumu Analizi Sonuçları:")
 print(analysis_results)
 
@@ -80,7 +56,7 @@ for hour in least_active_hours:
     users = least_active_users[least_active_users['Hour'] == hour]
     print(f"Saat {hour}: {users['Username'].unique()} (Toplam Tweet: {len(users)})")
 
-# Tweet sayılarını görselleştirme
+# 📊 Görselleştirme
 plt.figure(figsize=(10, 6))
 hourly_counts.plot(kind='bar', color='skyblue')
 plt.title('Tweet Sayılarına Göre Saat Analizi')
@@ -90,5 +66,5 @@ plt.xticks(rotation=0)
 plt.grid(axis='y')
 plt.axhline(y=hourly_counts.min(), color='r', linestyle='--', label='En Az Tweet Atılan Saat')
 plt.legend()
+plt.tight_layout()
 plt.show()
-

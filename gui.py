@@ -9,6 +9,8 @@ from PyQt6.QtGui import QTextCursor
 import markdown
 from data_moduls.veriÇekme03 import scrape_user_tweets
 from data_moduls.nlp import analiz, toku
+import asyncio
+import subprocess
 
 class ApiKeyDialog(QDialog):
     def __init__(self, parent=None):
@@ -197,9 +199,9 @@ class MainWindow(QMainWindow):
         self.auto_transfer_button.clicked.connect(self.auto_transfer)
         button_layout.addWidget(self.auto_transfer_button)
         
-        # Diğer butonlar için yer tutucular
-        self.button2 = QPushButton("Buton 2")
-        self.button2.setEnabled(False)  # Şimdilik devre dışı
+        # Twitter Oturum Aç butonu
+        self.button2 = QPushButton("Oturum Aç")
+        self.button2.clicked.connect(self.open_twitter_session)
         button_layout.addWidget(self.button2)
         
         self.button3 = QPushButton("Buton 3")
@@ -331,6 +333,14 @@ class MainWindow(QMainWindow):
         """Otomatik aktarım modülünü çalıştırır"""
         # Burada otomatik aktarım işlemlerini yapacak kodlar gelecek
         QMessageBox.information(self, "Bilgi", "Otomatik aktarım modülü çalıştırılıyor...")
+
+    def open_twitter_session(self):
+        try:
+            # data_moduls klasöründeki oturumAc.py'yi çalıştır
+            script_path = os.path.join(os.path.dirname(__file__), "data_moduls", "oturumAc.py")
+            subprocess.Popen([sys.executable, script_path])
+        except Exception as e:
+            QMessageBox.critical(self, "Hata", f"Twitter oturum açma işlemi başlatılamadı: {str(e)}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
