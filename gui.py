@@ -3,7 +3,7 @@ import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                             QHBoxLayout, QLabel, QLineEdit, QPushButton, 
                             QTextBrowser, QSpinBox, QMessageBox, QDialog,
-                            QFrame)
+                            QFrame, QProgressBar)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QTextCursor
 import markdown
@@ -82,6 +82,7 @@ class WorkerThread(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
     status_update = pyqtSignal(str, bool)
+    progress_update = pyqtSignal(int)
     
     def __init__(self, username, tweet_count):
         super().__init__()
@@ -92,6 +93,7 @@ class WorkerThread(QThread):
         try:
             # Tweet'leri çek
             self.status_update.emit("tweet_cekme", False)
+            self.progress_update.emit(10)
             tweets = scrape_user_tweets(self.username, self.tweet_count)
             
             if not tweets:
@@ -100,7 +102,10 @@ class WorkerThread(QThread):
             
             # JSON verisini hazırla
             json_data = []
-            for tweet in tweets:
+            total_tweets = len(tweets)
+            for i, tweet in enumerate(tweets):
+                progress = 20 + int((i / total_tweets) * 30)
+                self.progress_update.emit(progress)
                 idu = tweet['url'].split("/")[-1]
                 json_data.append({
                     "id": idu,
@@ -128,6 +133,7 @@ class WorkerThread(QThread):
             self.status_update.emit("kaydetme", True)
             
             # NLP analizi yap
+            self.progress_update.emit(60)
             self.status_update.emit("api_baglanti", False)
             metinler = toku(yol)
             if not metinler:
@@ -137,7 +143,9 @@ class WorkerThread(QThread):
             self.status_update.emit("api_baglanti", True)
             self.status_update.emit("api_cevap", False)
             
+            self.progress_update.emit(80)
             analiz_sonucu = analiz(metinler)
+            self.progress_update.emit(100)
             if analiz_sonucu:
                 self.status_update.emit("api_cevap", True)
                 self.finished.emit(analiz_sonucu)
@@ -205,6 +213,12 @@ class MainWindow(QMainWindow):
         status_layout.addLayout(status_indicators_layout)
         layout.addWidget(status_frame)
         
+        # Progress bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)
+        layout.addWidget(self.progress_bar)
+
         # Sonuç alanı
         self.result_text = QTextBrowser()
         self.result_text.setOpenExternalLinks(True)
@@ -275,6 +289,7 @@ class MainWindow(QMainWindow):
         self.worker.finished.connect(self.handle_results)
         self.worker.error.connect(self.handle_error)
         self.worker.status_update.connect(self.update_status)
+        self.worker.progress_update.connect(self.progress_bar.setValue)
         self.worker.start()
     
     def update_status(self, status_type, success):

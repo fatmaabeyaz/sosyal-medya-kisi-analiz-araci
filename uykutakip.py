@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # MongoDB bağlantı dizesi
-password = "xxxxx"  # Buraya şifrenizi yazın
-client = MongoClient(f"mongodb+srv://{kullanıcıadı}:{şifreniziyazın}@sosyalmedya.bvcdmdf.mongodb.net/sosyalmedya?retryWrites=true&w=majority")
+password = "12345Ff.."  # Buraya şifrenizi yazın
+client = MongoClient(f"mongodb+srv://fatmabeyaz418:12345Ff..@sosyalmedya.bvcdmdf.mongodb.net/sosyalmedya?retryWrites=true&w=majority")
 
 # Başarılı Bağlantı Kontrolü
 try:

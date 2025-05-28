@@ -14,7 +14,7 @@ def main():
     )
 
     # Tahmin yap
-    te = "onu öldürmek istiyorum nefret ediyorum"
+    te = "ananı sikerim"
     ta = loaded_model.predict([te])
     print("Sonuç:", "eksi" if ta[0][0] == 0 else "artı")
 
