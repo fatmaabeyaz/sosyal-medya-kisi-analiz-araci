@@ -7,6 +7,9 @@ import sys
 if len(sys.argv) != 2:
     print("Kullanım: python uykutakip.py kisiadi")
     sys.exit(1)
+# MongoDB bağlantı dizesi
+password = "xxxxx"  # Buraya şifrenizi yazın
+client = MongoClient(f"mongodb+srv://{kullanciadi:şifre}@sosyalmedya.bvcdmdf.mongodb.net/sosyalmedya?retryWrites=true&w=majority")
 
 kisi_adi = sys.argv[1]
 dosya_yolu = f"temp/{kisi_adi}.json"  # JSON dosyası yolu
