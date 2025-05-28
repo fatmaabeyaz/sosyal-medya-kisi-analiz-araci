@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import json
 import sys
 isim=""
-def main():
+def aa():
     # Modeli yükle
     model = ClassificationModel(
         "bert",
@@ -44,6 +44,13 @@ def main():
     print(df[["datetime", "tweet", "olumluluk"]])
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        #2. unsurun varlığına bakılır
+        print("Kullanım: python .\\gm_karışık_modül.py <kişi>")
+        print("yada")
+        print("python .\\nodel\gm_karışık_modül.py <kişi>")
+        sys.exit(1)
+    
 
-    isim = input("Lütfen kullanıcı adını girin (örn: elonmusk): ")
-    main()
+    isim = sys.argv[1]
+    aa()
