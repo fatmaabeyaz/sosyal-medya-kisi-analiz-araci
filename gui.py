@@ -257,11 +257,16 @@ class MainWindow(QMainWindow):
         self.check_api_key()
         
     def check_api_key(self):
-        api_key_exists = os.path.exists("api_key.txt")
+        # data_moduls klasörünün varlığını kontrol et ve yoksa oluştur
+        if not os.path.exists("data_moduls"):
+            os.makedirs("data_moduls")
+            
+        api_key_path = os.path.join("data_moduls", "api_key.txt")
+        api_key_exists = os.path.exists(api_key_path)
         api_key_valid = False
         
         if api_key_exists:
-            with open("api_key.txt", "r") as f:
+            with open(api_key_path, "r") as f:
                 api_key = f.read().strip()
                 api_key_valid = bool(api_key)
         
@@ -270,7 +275,7 @@ class MainWindow(QMainWindow):
             if dialog.exec() == QDialog.DialogCode.Accepted:
                 api_key = dialog.get_api_key()
                 if api_key:
-                    with open("api_key.txt", "w") as f:
+                    with open(api_key_path, "w") as f:
                         f.write(api_key)
                 else:
                     QMessageBox.warning(self, "Uyarı", "API anahtarı boş olamaz!")
