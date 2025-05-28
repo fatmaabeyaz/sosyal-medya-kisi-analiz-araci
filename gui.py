@@ -82,7 +82,6 @@ class WorkerThread(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
     status_update = pyqtSignal(str, bool)
-    progress_update = pyqtSignal(int)
     
     def __init__(self, username, tweet_count):
         super().__init__()
@@ -93,7 +92,6 @@ class WorkerThread(QThread):
         try:
             # Tweet'leri çek
             self.status_update.emit("tweet_cekme", False)
-            self.progress_update.emit(10)
             tweets = scrape_user_tweets(self.username, self.tweet_count)
             
             if not tweets:
@@ -102,10 +100,7 @@ class WorkerThread(QThread):
             
             # JSON verisini hazırla
             json_data = []
-            total_tweets = len(tweets)
-            for i, tweet in enumerate(tweets):
-                progress = 20 + int((i / total_tweets) * 30)
-                self.progress_update.emit(progress)
+            for tweet in tweets:
                 idu = tweet['url'].split("/")[-1]
                 json_data.append({
                     "id": idu,
@@ -133,7 +128,6 @@ class WorkerThread(QThread):
             self.status_update.emit("kaydetme", True)
             
             # NLP analizi yap
-            self.progress_update.emit(60)
             self.status_update.emit("api_baglanti", False)
             metinler = toku(yol)
             if not metinler:
@@ -143,9 +137,7 @@ class WorkerThread(QThread):
             self.status_update.emit("api_baglanti", True)
             self.status_update.emit("api_cevap", False)
             
-            self.progress_update.emit(80)
             analiz_sonucu = analiz(metinler)
-            self.progress_update.emit(100)
             if analiz_sonucu:
                 self.status_update.emit("api_cevap", True)
                 self.finished.emit(analiz_sonucu)
@@ -197,6 +189,29 @@ class MainWindow(QMainWindow):
         status_frame.setFrameShape(QFrame.Shape.StyledPanel)
         status_layout = QVBoxLayout(status_frame)
         
+        # Butonlar için yeni layout
+        button_layout = QHBoxLayout()
+        
+        # Otomatik Aktar butonu
+        self.auto_transfer_button = QPushButton("Otomatik Aktar")
+        self.auto_transfer_button.clicked.connect(self.auto_transfer)
+        button_layout.addWidget(self.auto_transfer_button)
+        
+        # Diğer butonlar için yer tutucular
+        self.button2 = QPushButton("Buton 2")
+        self.button2.setEnabled(False)  # Şimdilik devre dışı
+        button_layout.addWidget(self.button2)
+        
+        self.button3 = QPushButton("Buton 3")
+        self.button3.setEnabled(False)  # Şimdilik devre dışı
+        button_layout.addWidget(self.button3)
+        
+        self.button4 = QPushButton("Buton 4")
+        self.button4.setEnabled(False)  # Şimdilik devre dışı
+        button_layout.addWidget(self.button4)
+        
+        status_layout.addLayout(button_layout)
+        
         # Durum göstergeleri - yan yana yerleştirme
         status_indicators_layout = QHBoxLayout()
         self.tweet_status = StatusIndicator("Tweet çekme aşamasında")
@@ -213,12 +228,6 @@ class MainWindow(QMainWindow):
         status_layout.addLayout(status_indicators_layout)
         layout.addWidget(status_frame)
         
-        # Progress bar
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setRange(0, 100)
-        self.progress_bar.setValue(0)
-        layout.addWidget(self.progress_bar)
-
         # Sonuç alanı
         self.result_text = QTextBrowser()
         self.result_text.setOpenExternalLinks(True)
@@ -289,7 +298,6 @@ class MainWindow(QMainWindow):
         self.worker.finished.connect(self.handle_results)
         self.worker.error.connect(self.handle_error)
         self.worker.status_update.connect(self.update_status)
-        self.worker.progress_update.connect(self.progress_bar.setValue)
         self.worker.start()
     
     def update_status(self, status_type, success):
@@ -318,6 +326,11 @@ class MainWindow(QMainWindow):
         QMessageBox.critical(self, "Hata", error_message)
         self.analyze_button.setEnabled(True)
         self.statusBar().showMessage("Hata oluştu")
+
+    def auto_transfer(self):
+        """Otomatik aktarım modülünü çalıştırır"""
+        # Burada otomatik aktarım işlemlerini yapacak kodlar gelecek
+        QMessageBox.information(self, "Bilgi", "Otomatik aktarım modülü çalıştırılıyor...")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
