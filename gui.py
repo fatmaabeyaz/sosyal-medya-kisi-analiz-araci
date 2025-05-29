@@ -173,7 +173,7 @@ class MainWindow(QMainWindow):
         # Tweet sayısı girişi
         tweet_count_label = QLabel("Tweet Sayısı:")
         self.tweet_count_input = QSpinBox()
-        self.tweet_count_input.setRange(1, 100)
+        self.tweet_count_input.setRange(1, 1000)
         self.tweet_count_input.setValue(10)
         top_layout.addWidget(tweet_count_label)
         top_layout.addWidget(self.tweet_count_input)
@@ -208,8 +208,8 @@ class MainWindow(QMainWindow):
         self.button3.clicked.connect(self.run_sleep_analysis)  # Şimdilik devre dışı
         button_layout.addWidget(self.button3)
         
-        self.button4 = QPushButton("Buton 4")
-        self.button4.setEnabled(False)  # Şimdilik devre dışı
+        self.button4 = QPushButton("Duygu Analizi")
+        self.button4.clicked.connect(self.run_sentiment_analysis)
         button_layout.addWidget(self.button4)
         
         status_layout.addLayout(button_layout)
@@ -358,6 +358,21 @@ class MainWindow(QMainWindow):
             
         except Exception as e:
             QMessageBox.critical(self, "Hata", f"Uyku takibi çalıştırılırken bir hata oluştu:\n{str(e)}")
+
+    def run_sentiment_analysis(self):
+        username = self.username_input.text().strip()
+        if not username:
+            QMessageBox.warning(self, "Uyarı", "Lütfen bir kullanıcı adı girin!")
+            return
+            
+        try:
+            # Duygu analizi modülünü çalıştır
+            subprocess.Popen(
+                [sys.executable, "nodel/gm_karışık_modül.py", username]
+            )
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Hata", f"Duygu analizi çalıştırılırken bir hata oluştu:\n{str(e)}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
